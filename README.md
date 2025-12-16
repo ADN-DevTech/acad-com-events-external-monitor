@@ -181,7 +181,11 @@ This is a demonstration project for educational purposes.
 
 Watch the demonstration video showing the event monitor in action:
 
-https://github.com/ADN-DevTech/acad-com-events-external-monitor/assets/Demo.mp4
+https://github.com/user-attachments/assets/587ef723-3821-4af6-8ce6-9ef8f3ac4ddd
+
+
+
+
 
 **Or download:** [Demo.mp4](./docs/Demo.mp4)
 
