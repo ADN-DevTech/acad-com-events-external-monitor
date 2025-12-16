@@ -8,23 +8,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Use Named Pipes program instead of COM -->
+    <StartupObject>AcadDocEventsTester.ProgramNamedPipes</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
-  <!-- Reference to AutoCAD 2026 Interop for GetActiveObject -->
-  <ItemGroup>
-    <Reference Include="Autodesk.AutoCAD.Interop">
-      <HintPath>D:\Acad\AutoCAD 2026\Autodesk.AutoCAD.Interop.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
-  </ItemGroup>
+  <!-- No longer need AutoCAD Interop or project reference for Named Pipes version -->
 
-  <!-- Reference the add-in project for IntelliSense -->
+  <!-- Exclude old COM-based files -->
   <ItemGroup>
-    <ProjectReference Include="..\InteropFromAcadAddin\InteropFromAcadAddin.csproj" />
+    <Compile Remove="Program.cs" />
+    <Compile Remove="ComEventSink.cs" />
+    <Compile Remove="ComUtils.cs" />
   </ItemGroup>
 
 </Project>

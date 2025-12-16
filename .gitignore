@@ -411,3 +411,9 @@ FodyWeavers.xsd
 
 # Project specific - do not ignore these bat files as they're part of the solution
 # !InteropFromAcadAddin/scripts/*.bat
+
+# Migration documentation and templates (keep in docs for reference but don't track changes)
+docs/*.net8
+docs/*-NET8-*.md
+docs/MIGRATION-*.md
+docs/Apply-*.ps1

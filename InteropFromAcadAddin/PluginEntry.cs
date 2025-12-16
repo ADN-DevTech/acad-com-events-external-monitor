@@ -254,6 +254,9 @@ namespace InteropFromAcadAddin
         private static readonly Hashtable _sharedEventHandlers = new Hashtable();
         private static bool _sharedIsStarted = false;
         
+        // Named Pipe broadcaster for IPC
+        private static EventBroadcaster? _broadcaster;
+        
         // Instance reference for the AutoCAD plugin
         private static PluginEntry? _instance;
         public static PluginEntry Instance => _instance ??= new PluginEntry();
@@ -273,6 +276,10 @@ namespace InteropFromAcadAddin
         {
             if (_sharedIsStarted) return;
             _sharedIsStarted = true;
+
+            // Start Named Pipe broadcaster
+            _broadcaster = new EventBroadcaster();
+            _broadcaster.Start();
 
             // Register DocumentManager event handlers
             Application.DocumentManager.DocumentCreated += DocumentManager_DocumentCreated;
@@ -296,6 +303,11 @@ namespace InteropFromAcadAddin
         {
             if (!_sharedIsStarted) return;
             _sharedIsStarted = false;
+
+            // Stop Named Pipe broadcaster
+            _broadcaster?.Stop();
+            _broadcaster?.Dispose();
+            _broadcaster = null;
 
             // Unregister DocumentManager event handlers
             Application.DocumentManager.DocumentCreated -= DocumentManager_DocumentCreated;
@@ -335,7 +347,17 @@ namespace InteropFromAcadAddin
         private void DocumentManager_DocumentCreated(object sender, DocumentCollectionEventArgs e)
         {
             var docName = e.Document?.Name ?? string.Empty;
+            
+            // Fire COM event
             DocumentCreatedEvent?.Invoke(docName);
+            
+            // Broadcast via Named Pipe
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "DocumentCreated",
+                DocumentName = docName
+            });
+            
             AttachToDocument(e.Document);
         }
 
@@ -481,13 +503,35 @@ namespace InteropFromAcadAddin
         private void callback_CommandWillStart(object sender, CommandEventArgs e)
         {
             var docName = SafeDocName(sender);
-            CommandStartedEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
+            var cmdName = e.GlobalCommandName ?? string.Empty;
+            
+            // Fire COM event
+            CommandStartedEvent?.Invoke(docName, cmdName);
+            
+            // Broadcast via Named Pipe
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CommandStarted",
+                DocumentName = docName,
+                CommandName = cmdName
+            });
         }
 
         private void callback_CommandEnded(object sender, CommandEventArgs e)
         {
             var docName = SafeDocName(sender);
-            CommandEndedEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
+            var cmdName = e.GlobalCommandName ?? string.Empty;
+            
+            // Fire COM event
+            CommandEndedEvent?.Invoke(docName, cmdName);
+            
+            // Broadcast via Named Pipe
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CommandEnded",
+                DocumentName = docName,
+                CommandName = cmdName
+            });
         }
 
         private void callback_CommandCancelled(object sender, CommandEventArgs e)
