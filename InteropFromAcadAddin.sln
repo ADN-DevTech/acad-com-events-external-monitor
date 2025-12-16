@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36705.20 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InteropFromAcadAddin", "InteropFromAcadAddin\InteropFromAcadAddin.csproj", "{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcadDocEventsTester", "AcadDocEventsTester\AcadDocEventsTester.csproj", "{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Debug|x64.ActiveCfg = Debug|x64
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Debug|x64.Build.0 = Debug|x64
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Release|x64.ActiveCfg = Release|x64
+		{0A9F8BA8-6692-413E-A2F3-8270865BC4EF}.Release|x64.Build.0 = Release|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Debug|Any CPU.Build.0 = Debug|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Debug|x64.ActiveCfg = Debug|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Debug|x64.Build.0 = Debug|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Release|Any CPU.ActiveCfg = Release|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Release|Any CPU.Build.0 = Release|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Release|x64.ActiveCfg = Release|x64
+		{B3158B76-EEC1-FBE5-9BE3-EA0751D4B576}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE65CEC9-8266-4A2B-9DAD-D21266F5B64A}
+	EndGlobalSection
+EndGlobal
