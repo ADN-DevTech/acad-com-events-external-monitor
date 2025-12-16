@@ -46,9 +46,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="scripts\Register-AcadAddin.bat" />
-    <None Include="scripts\Unregister-AcadAddin.bat" />
-  </ItemGroup>
-
 </Project>
