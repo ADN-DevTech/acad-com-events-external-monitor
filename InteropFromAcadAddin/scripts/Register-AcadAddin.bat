@@ -1,44 +1,45 @@
 @echo off
-setlocal
-cd /d "%~dp0"
+echo ========================================
+echo Registering InteropFromAcadAddin (.NET 8)
+echo ========================================
 
-REM AutoCAD add-in COM registration for .NET Framework 4.8 (x64)
-REM Usage: double-click to register Debug build, or pass CONFIG=Release
-REM Example: Register-AcadAddin.bat CONFIG=Release
+set COMHOST_PATH=%~dp0..\bin\x64\Debug\InteropFromAcadAddin.comhost.dll
 
-set CONFIG=%CONFIG%
-if "%CONFIG%"=="" set CONFIG=Debug
-
-REM Project output DLL path (prefer x64 output path, fallback to non-arch)
-set DLL=..\bin\x64\%CONFIG%\InteropFromAcadAddin.dll
-if not exist "%DLL%" set DLL=..\bin\%CONFIG%\InteropFromAcadAddin.dll
-
-if not exist "%DLL%" (
-    echo DLL not found: %DLL%
-    echo Build the project for configuration %CONFIG% x64 and try again.
+if not exist "%COMHOST_PATH%" (
+    echo ERROR: COM host DLL not found at %COMHOST_PATH%
+    echo Please build the project first with: dotnet build -c Debug -p:Platform=x64
     pause
     exit /b 1
 )
 
-set REGASM64=%windir%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe
-if not exist "%REGASM64%" (
-    echo regasm not found at %REGASM64%
-    echo Ensure .NET Framework 4.x is installed.
-    pause
-    exit /b 1
+echo.
+echo COM Host DLL: %COMHOST_PATH%
+echo.
+
+echo Registering with regsvr32...
+regsvr32 /s "%COMHOST_PATH%"
+
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ========================================
+    echo SUCCESS: COM registration completed
+    echo ========================================
+    echo.
+    echo Next steps:
+    echo 1. Launch AutoCAD 2026
+    echo 2. Type NETLOAD
+    echo 3. Browse to: %~dp0..\bin\x64\Debug\InteropFromAcadAddin.dll
+    echo 4. Run the AcadDocEventsTester console app
+) else (
+    echo.
+    echo ========================================
+    echo ERROR: Registration failed with code %ERRORLEVEL%
+    echo ========================================
+    echo.
+    echo Troubleshooting:
+    echo - Make sure you're running as Administrator
+    echo - Verify the DLL was built successfully
 )
 
-REM Register with codebase and generate type library for COM consumption
-"%REGASM64%" "%DLL%"
-
-if %errorlevel% neq 0 (
-    echo Registration failed with error %errorlevel%.
-    pause
-    exit /b %errorlevel%
-)
-
-echo Registration completed successfully.
+echo.
 pause
-
-
-

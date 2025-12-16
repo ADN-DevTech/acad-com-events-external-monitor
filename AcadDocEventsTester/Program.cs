@@ -1,41 +1,57 @@
-using Autodesk.AutoCAD.Interop;
 using InteropFromAcadAddin;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Threading;
 
 namespace AcadDocEventsTester
 {
     class Program
     {
-        const string progId = "AutoCAD.Application.24.3";
+        const string progId = "AutoCAD.Application.25.1";  // AutoCAD 2026
 
         static void Main(string[] args)
         {
-            Console.WriteLine("**AutoCAD Event Monitor**\n");
+            Console.WriteLine("**AutoCAD Event Monitor (.NET 8)**\n");
 
-            // Get AutoCAD Application
-            dynamic acadApp = Marshal.GetActiveObject("AutoCAD.Application.24.3");
+            // Get AutoCAD Application using custom GetActiveObject (Marshal.GetActiveObject not available in .NET 8)
+            dynamic? acadApp = ComUtils.GetActiveObject(progId);
+            
+            if (acadApp == null)
+            {
+                Console.WriteLine($"ERROR: AutoCAD is not running or ProgID '{progId}' is incorrect.");
+                Console.WriteLine("Please launch AutoCAD 2026 first.");
+                Console.WriteLine("\nPress ENTER to exit...");
+                Console.ReadLine();
+                return;
+            }
+
             Console.WriteLine($"Connected to: {acadApp.Name} {acadApp.Version}");
 
-            object pluginObj = acadApp.GetInterfaceObject("InteropFromAcadAddin.IDocumentEventService");
+            // Try direct COM activation instead of GetInterfaceObject
+            // This works better with .NET 8 COM hosting
+            object? pluginObj = null;
+            try
+            {
+                Type? comType = Type.GetTypeFromProgID("InteropFromAcadAddin.IDocumentEventService");
+                if (comType != null)
+                {
+                    pluginObj = Activator.CreateInstance(comType);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Direct COM activation failed: {ex.Message}");
+                Console.WriteLine("Trying GetInterfaceObject...");
+                pluginObj = acadApp.GetInterfaceObject("InteropFromAcadAddin.IDocumentEventService");
+            }
 
             if (pluginObj != null)
             {
                 Console.WriteLine("Plugin service retrieved successfully.\n");
 
-                // Call Start() method to begin monitoring
-                try
-                {
-                    ((IDocumentEventService)pluginObj).Start();
-                    Console.WriteLine("Service started - now monitoring AutoCAD events.\n");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Warning: Failed to call Start(): {ex.Message}\n");
-                }
+                // NOTE: Don't call Start() here - it's already called when the plugin loads in AutoCAD
+                // Calling Start() from external client would try to load AutoCAD assemblies in this process
+                Console.WriteLine("Service is already running in AutoCAD process.\n");
 
                 IntPtr pUnknown = IntPtr.Zero;
                 IntPtr pContainer = IntPtr.Zero;
@@ -71,16 +87,9 @@ namespace AcadDocEventsTester
                         // Cleanup
                         Console.WriteLine("\nStopping event monitoring...");
                         Unadvise(pConnectionPoint, cookie);
+                        Console.WriteLine("Disconnected from events.");
                         
-                        try
-                        {
-                            ((IDocumentEventService)pluginObj).Stop();
-                            Console.WriteLine("Service stopped.");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Warning: Failed to call Stop(): {ex.Message}");
-                        }
+                        // NOTE: Don't call Stop() - the service keeps running in AutoCAD
                     }
                 }
                 finally

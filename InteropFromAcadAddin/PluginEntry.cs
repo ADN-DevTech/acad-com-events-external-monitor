@@ -5,12 +5,12 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using Exception = System.Exception;
-using System.EnterpriseServices;
 
 // Assembly Attributes: Required for the AutoCAD runtime and COM visibility
 [assembly: ExtensionApplication(typeof(InteropFromAcadAddin.PluginExtension))]
 [assembly: CommandClass(typeof(InteropFromAcadAddin.PluginEntry))]
-[assembly: ComVisible(true)] // Ensure assembly-level COM visibility
+// NOTE: In .NET 8, we use explicit ComVisible on individual types to avoid GUID requirements on all types
+[assembly: ComVisible(false)]
 
 namespace InteropFromAcadAddin
 {
@@ -107,6 +107,8 @@ namespace InteropFromAcadAddin
     // APPLICATION EXTENSION & REGISTRATION
     // =========================================================================
 
+    // NOTE: PluginExtension is NOT a COM class - it's an AutoCAD extension application class
+    // Assembly default is ComVisible(false), so no attribute needed
     public class PluginExtension : IExtensionApplication
     {
         // Now, we hold the instance here, as PluginEntry is no longer a singleton.
@@ -127,31 +129,14 @@ namespace InteropFromAcadAddin
             // Start listening when the add-in loads
             _service.Start();
 
-            // Explicit self-registration for the COM component
-            SelfRegisterComTypes();
+            // NOTE: .NET 8 does not support runtime COM self-registration
+            // Use regasm.exe manually - see scripts\Register-AcadAddin.bat
         }
 
         public void Terminate()
         {
             _service?.Stop();
             _service?.DetachFromAllDocuments();
-        }
-
-        private static void SelfRegisterComTypes()
-        {
-            try
-            {
-                var asm = Assembly.GetExecutingAssembly();
-                var reg = new RegistrationServices();
-
-                // CRITICAL: SetCodeBase is essential to register the DLL's location.
-                reg.RegisterAssembly(asm, AssemblyRegistrationFlags.SetCodeBase);
-            }
-            catch (Exception ex)
-            {
-                // This will output a message to the AutoCAD trace log if registration fails
-                System.Diagnostics.Trace.WriteLine("COM Self-Registration failed: " + ex.Message);
-            }
         }
     }
 
@@ -161,115 +146,133 @@ namespace InteropFromAcadAddin
 
     [ProgId(Consts.AcadPluginProgId)]
     [Guid("75B37C6C-8047-41E3-8C4D-D5196EEFF368")]
-    [ClassInterface(ClassInterfaceType.AutoDual)]
+    [ClassInterface(ClassInterfaceType.None)]
     [ComSourceInterfaces(typeof(IDocumentEventServiceEvents))]
     [ComVisible(true)]
-    public class PluginEntry : ServicedComponent, IDocumentEventService
+    public class PluginEntry : IDocumentEventService
     {
+        // Public static accessor for COM activation
+        // Returns the singleton instance for COM clients
+        [ComRegisterFunction]
+        public static void RegisterClass(string key)
+        {
+            // No-op, but required for proper COM registration
+        }
+
+        [ComUnregisterFunction]
+        public static void UnregisterClass(string key)
+        {
+            // No-op
+        }
       
         // ======================================================================
         // COM EVENT DELEGATES - Document Command Events
         // ======================================================================
         public delegate void CommandStartedEventHandler(string documentName, string commandName);
-        public event CommandStartedEventHandler CommandStartedEvent;
+        public event CommandStartedEventHandler? CommandStartedEvent;
 
         public delegate void CommandEndedEventHandler(string documentName, string commandName);
-        public event CommandEndedEventHandler CommandEndedEvent;
+        public event CommandEndedEventHandler? CommandEndedEvent;
 
         public delegate void CommandCancelledEventHandler(string documentName, string commandName);
-        public event CommandCancelledEventHandler CommandCancelledEvent;
+        public event CommandCancelledEventHandler? CommandCancelledEvent;
 
         public delegate void CommandFailedEventHandler(string documentName, string commandName);
-        public event CommandFailedEventHandler CommandFailedEvent;
+        public event CommandFailedEventHandler? CommandFailedEvent;
 
         public delegate void UnknownCommandEventHandler(string documentName, string commandName);
-        public event UnknownCommandEventHandler UnknownCommandEvent;
+        public event UnknownCommandEventHandler? UnknownCommandEvent;
 
         // ======================================================================
         // COM EVENT DELEGATES - Document LISP Events
         // ======================================================================
         public delegate void LispCancelledEventHandler(string documentName);
-        public event LispCancelledEventHandler LispCancelledEvent;
+        public event LispCancelledEventHandler? LispCancelledEvent;
 
         public delegate void LispEndedEventHandler(string documentName);
-        public event LispEndedEventHandler LispEndedEvent;
+        public event LispEndedEventHandler? LispEndedEvent;
 
         public delegate void LispWillStartEventHandler(string documentName, string firstLine);
-        public event LispWillStartEventHandler LispWillStartEvent;
+        public event LispWillStartEventHandler? LispWillStartEvent;
 
         // ======================================================================
         // COM EVENT DELEGATES - Document Close Events
         // ======================================================================
         public delegate void BeginDocumentCloseEventHandler(string documentName);
-        public event BeginDocumentCloseEventHandler BeginDocumentCloseEvent;
+        public event BeginDocumentCloseEventHandler? BeginDocumentCloseEvent;
 
         public delegate void CloseAbortedEventHandler(string documentName);
-        public event CloseAbortedEventHandler CloseAbortedEvent;
+        public event CloseAbortedEventHandler? CloseAbortedEvent;
 
         public delegate void CloseWillStartEventHandler(string documentName);
-        public event CloseWillStartEventHandler CloseWillStartEvent;
+        public event CloseWillStartEventHandler? CloseWillStartEvent;
 
         // ======================================================================
         // COM EVENT DELEGATES - DocumentManager Events
         // ======================================================================
         public delegate void DocumentCreatedEventHandler(string documentName);
-        public event DocumentCreatedEventHandler DocumentCreatedEvent;
+        public event DocumentCreatedEventHandler? DocumentCreatedEvent;
 
         public delegate void DocumentToBeActivatedEventHandler(string documentName);
-        public event DocumentToBeActivatedEventHandler DocumentToBeActivatedEvent;
+        public event DocumentToBeActivatedEventHandler? DocumentToBeActivatedEvent;
 
         public delegate void DocumentActivatedEventHandler(string documentName);
-        public event DocumentActivatedEventHandler DocumentActivatedEvent;
+        public event DocumentActivatedEventHandler? DocumentActivatedEvent;
 
         public delegate void DocumentToBeDeactivatedEventHandler(string documentName);
-        public event DocumentToBeDeactivatedEventHandler DocumentToBeDeactivatedEvent;
+        public event DocumentToBeDeactivatedEventHandler? DocumentToBeDeactivatedEvent;
 
         public delegate void DocumentActivationChangedEventHandler(string documentName, bool activated);
-        public event DocumentActivationChangedEventHandler DocumentActivationChangedEvent;
+        public event DocumentActivationChangedEventHandler? DocumentActivationChangedEvent;
 
         public delegate void DocumentBecameCurrentEventHandler(string documentName);
-        public event DocumentBecameCurrentEventHandler DocumentBecameCurrentEvent;
+        public event DocumentBecameCurrentEventHandler? DocumentBecameCurrentEvent;
 
         public delegate void DocumentToBeDestroyedEventHandler(string documentName);
-        public event DocumentToBeDestroyedEventHandler DocumentToBeDestroyedEvent;
+        public event DocumentToBeDestroyedEventHandler? DocumentToBeDestroyedEvent;
 
         public delegate void DocumentDestroyedEventHandler(string fileName);
-        public event DocumentDestroyedEventHandler DocumentDestroyedEvent;
+        public event DocumentDestroyedEventHandler? DocumentDestroyedEvent;
 
         public delegate void DocumentCreationStartedEventHandler(string documentName);
-        public event DocumentCreationStartedEventHandler DocumentCreationStartedEvent;
+        public event DocumentCreationStartedEventHandler? DocumentCreationStartedEvent;
 
         public delegate void DocumentCreationCancelledEventHandler(string documentName);
-        public event DocumentCreationCancelledEventHandler DocumentCreationCancelledEvent;
+        public event DocumentCreationCancelledEventHandler? DocumentCreationCancelledEvent;
 
         public delegate void DocumentLockModeChangedEventHandler(string documentName, string previousMode, string currentMode, string commandName);
-        public event DocumentLockModeChangedEventHandler DocumentLockModeChangedEvent;
+        public event DocumentLockModeChangedEventHandler? DocumentLockModeChangedEvent;
 
         public delegate void DocumentLockModeChangeVetoedEventHandler(string documentName, string commandName);
-        public event DocumentLockModeChangeVetoedEventHandler DocumentLockModeChangeVetoedEvent;
+        public event DocumentLockModeChangeVetoedEventHandler? DocumentLockModeChangeVetoedEvent;
 
         public delegate void DocumentLockModeWillChangeEventHandler(string documentName, string currentMode, string newMode, string commandName);
-        public event DocumentLockModeWillChangeEventHandler DocumentLockModeWillChangeEvent;
+        public event DocumentLockModeWillChangeEventHandler? DocumentLockModeWillChangeEvent;
 
 
-        private readonly Hashtable _eventHandlers = new Hashtable();
-        private bool _isStarted = false;
-
-        // Constructor MUST be public for COM activation.
-        // It must NOT contain any complex AutoCAD API calls that might fail.
-        private static PluginEntry _instance;
+        // Shared static state - ALL instances (AutoCAD and COM clients) share these
+        private static readonly Hashtable _sharedEventHandlers = new Hashtable();
+        private static bool _sharedIsStarted = false;
+        
+        // Instance reference for the AutoCAD plugin
+        private static PluginEntry? _instance;
         public static PluginEntry Instance => _instance ??= new PluginEntry();
 
+        // Constructor for COM activation - all instances share the static state
         public PluginEntry()
         {
-            _instance = this;
+            // First instance becomes the singleton
+            if (_instance == null)
+            {
+                _instance = this;
+            }
         }
 
         // IDocumentEventService Implementation
         public void Start()
         {
-            if (_isStarted) return;
-            _isStarted = true;
+            if (_sharedIsStarted) return;
+            _sharedIsStarted = true;
 
             // Register DocumentManager event handlers
             Application.DocumentManager.DocumentCreated += DocumentManager_DocumentCreated;
@@ -291,8 +294,8 @@ namespace InteropFromAcadAddin
 
         public void Stop()
         {
-            if (!_isStarted) return;
-            _isStarted = false;
+            if (!_sharedIsStarted) return;
+            _sharedIsStarted = false;
 
             // Unregister DocumentManager event handlers
             Application.DocumentManager.DocumentCreated -= DocumentManager_DocumentCreated;
@@ -323,7 +326,7 @@ namespace InteropFromAcadAddin
         public void DetachFromAllDocuments()
         {
             // Iterate over a copy of the keys since detaching modifies the collection
-            foreach (Document doc in new ArrayList(_eventHandlers.Keys))
+            foreach (Document doc in new ArrayList(_sharedEventHandlers.Keys))
             {
                 DetachFromDocument(doc);
             }
@@ -417,9 +420,11 @@ namespace InteropFromAcadAddin
         // DOCUMENT ATTACH/DETACH METHODS
         // =========================================================================
 
-        private void AttachToDocument(Document doc)
+        private void AttachToDocument(Document? doc)
         {
-            if (!_eventHandlers.ContainsKey(doc))
+            if (doc == null) return;
+            
+            if (!_sharedEventHandlers.ContainsKey(doc))
             {
                 // Subscribe to all relevant AutoCAD document events
                 // Command Events
@@ -439,13 +444,13 @@ namespace InteropFromAcadAddin
                 doc.CloseAborted += callback_CloseAborted;
                 doc.CloseWillStart += callback_CloseWillStart;
 
-                _eventHandlers.Add(doc, true);
+                _sharedEventHandlers.Add(doc, true);
             }
         }
 
         private void DetachFromDocument(Document doc)
         {
-            if (_eventHandlers.ContainsKey(doc))
+            if (_sharedEventHandlers.ContainsKey(doc))
             {
                 // Unsubscribe from all relevant AutoCAD document events
                 // Command Events
@@ -465,7 +470,7 @@ namespace InteropFromAcadAddin
                 doc.CloseAborted -= callback_CloseAborted;
                 doc.CloseWillStart -= callback_CloseWillStart;
 
-                _eventHandlers.Remove(doc);
+                _sharedEventHandlers.Remove(doc);
             }
         }
 
@@ -503,13 +508,13 @@ namespace InteropFromAcadAddin
             UnknownCommandEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
         }
 
-        private void callback_LispCancelled(object sender, EventArgs e)
+        private void callback_LispCancelled(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             LispCancelledEvent?.Invoke(docName);
         }
 
-        private void callback_LispEnded(object sender, EventArgs e)
+        private void callback_LispEnded(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             LispEndedEvent?.Invoke(docName);
@@ -527,19 +532,19 @@ namespace InteropFromAcadAddin
             BeginDocumentCloseEvent?.Invoke(docName);
         }
 
-        private void callback_CloseAborted(object sender, EventArgs e)
+        private void callback_CloseAborted(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             CloseAbortedEvent?.Invoke(docName);
         }
 
-        private void callback_CloseWillStart(object sender, EventArgs e)
+        private void callback_CloseWillStart(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             CloseWillStartEvent?.Invoke(docName);
         }
 
-        private static string SafeDocName(object sender)
+        private static string SafeDocName(object? sender)
         {
             try
             {
