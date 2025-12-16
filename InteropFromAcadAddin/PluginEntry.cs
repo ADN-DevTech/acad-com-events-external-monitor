@@ -538,54 +538,112 @@ namespace InteropFromAcadAddin
         {
             var docName = SafeDocName(sender);
             CommandCancelledEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CommandCancelled",
+                DocumentName = docName,
+                CommandName = e.GlobalCommandName ?? string.Empty
+            });
         }
 
         private void callback_CommandFailed(object sender, CommandEventArgs e)
         {
             var docName = SafeDocName(sender);
             CommandFailedEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CommandFailed",
+                DocumentName = docName,
+                CommandName = e.GlobalCommandName ?? string.Empty
+            });
         }
 
         private void callback_UnknownCommand(object sender, UnknownCommandEventArgs e)
         {
             var docName = SafeDocName(sender);
             UnknownCommandEvent?.Invoke(docName, e.GlobalCommandName ?? string.Empty);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "UnknownCommand",
+                DocumentName = docName,
+                CommandName = e.GlobalCommandName ?? string.Empty
+            });
         }
 
         private void callback_LispCancelled(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             LispCancelledEvent?.Invoke(docName);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "LispCancelled",
+                DocumentName = docName
+            });
         }
 
         private void callback_LispEnded(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             LispEndedEvent?.Invoke(docName);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "LispEnded",
+                DocumentName = docName
+            });
         }
 
         private void callback_LispWillStart(object sender, LispWillStartEventArgs e)
         {
             var docName = SafeDocName(sender);
             LispWillStartEvent?.Invoke(docName, e.FirstLine ?? string.Empty);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "LispWillStart",
+                DocumentName = docName,
+                CommandName = e.FirstLine ?? string.Empty
+            });
         }
 
         private void callback_BeginDocumentClose(object sender, DocumentBeginCloseEventArgs e)
         {
             var docName = SafeDocName(sender);
             BeginDocumentCloseEvent?.Invoke(docName);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "BeginDocumentClose",
+                DocumentName = docName
+            });
         }
 
         private void callback_CloseAborted(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             CloseAbortedEvent?.Invoke(docName);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CloseAborted",
+                DocumentName = docName
+            });
         }
 
         private void callback_CloseWillStart(object? sender, EventArgs e)
         {
             var docName = SafeDocName(sender);
             CloseWillStartEvent?.Invoke(docName);
+            
+            _broadcaster?.BroadcastEvent(new EventMessage
+            {
+                EventType = "CloseWillStart",
+                DocumentName = docName
+            });
         }
 
         private static string SafeDocName(object? sender)

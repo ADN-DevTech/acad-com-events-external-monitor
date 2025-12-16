@@ -6,8 +6,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Enable COM hosting - generates .comhost.dll for regsvr32 registration -->
-    <EnableComHosting>true</EnableComHosting>
+    <!-- COM not needed - using Named Pipes IPC instead -->
+    <EnableComHosting>false</EnableComHosting>
     <EnableRegFreeCom>false</EnableRegFreeCom>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
