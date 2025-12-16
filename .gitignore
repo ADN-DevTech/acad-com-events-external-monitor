@@ -405,5 +405,9 @@ FodyWeavers.xsd
 *.bak
 *.dxf
 
+# Allow video files for documentation
+!*.mp4
+!*.gif
+
 # Project specific - do not ignore these bat files as they're part of the solution
 # !InteropFromAcadAddin/scripts/*.bat

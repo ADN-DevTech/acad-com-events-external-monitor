@@ -179,7 +179,18 @@ This is a demonstration project for educational purposes.
 
 ## Video Demo
 
-[Watch the demonstration video here]
+Watch the demonstration video showing the event monitor in action:
+
+https://github.com/ADN-DevTech/acad-com-events-external-monitor/assets/Demo.mp4
+
+**Or download:** [Demo.mp4](./docs/Demo.mp4)
+
+The video demonstrates:
+- Loading the AutoCAD add-in with NETLOAD
+- Running the console application
+- Real-time event monitoring as commands are executed
+- Color-coded event output with timestamps
+- Document lifecycle events (create, activate, close)
 
 ---
 
